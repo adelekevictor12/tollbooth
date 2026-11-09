@@ -3,9 +3,11 @@
  *   AI_PROVIDER=gemini|anthropic (explicit), otherwise auto:
  *   GEMINI_API_KEY → Gemini, ANTHROPIC_API_KEY → Claude.
  */
+import "./env.ts"; // loads agent/.env — hoisted before any code below runs
+
+const explicit = process.env.AI_PROVIDER?.trim();
 const provider =
-  process.env.AI_PROVIDER ??
-  (process.env.GEMINI_API_KEY ? "gemini" : process.env.ANTHROPIC_API_KEY ? "anthropic" : null);
+  explicit || (process.env.GEMINI_API_KEY ? "gemini" : process.env.ANTHROPIC_API_KEY ? "anthropic" : null);
 
 if (!provider) {
   console.error(

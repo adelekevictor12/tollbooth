@@ -106,11 +106,20 @@ server.tool(
 
 server.tool(
   "tb_approve_order",
-  "Complete a purchase: in mock mode it instantly approves+captures; in PayPal sandbox mode it captures if the payer has approved (otherwise returns the approve URL for a human).",
+  "Complete a purchase. In mock mode it instantly approves+captures. In PayPal sandbox mode it polls for up to ~75 seconds while a human completes PayPal buyer approval in their browser — call it and stay patient; it returns 'completed' once payment is captured.",
   { orderId: z.number().int().describe("Order id from tb_create_order") },
   async ({ orderId }) => {
-    const json = await api(`/api/orders/${orderId}/approve`, { method: "POST" });
-    return { content: [{ type: "text", text: JSON.stringify(json, null, 2) }] };
+    for (let i = 0; i < 15; i++) {
+      const json = await api(`/api/orders/${orderId}/approve`, { method: "POST" });
+      if (json.ok) return { content: [{ type: "text", text: JSON.stringify(json) }] };
+      if (i < 14) await new Promise((r) => setTimeout(r, 5000));
+    }
+    return {
+      content: [{
+        type: "text",
+        text: `Order ${orderId} is still awaiting payer approval. The payer must open the approve URL (see tb_create_order output) in a browser and complete PayPal checkout. Call this tool again afterwards.`,
+      }],
+    };
   }
 );
 
