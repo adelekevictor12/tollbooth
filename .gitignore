@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+.env*.local
+.DS_Store
+*.log
+coverage/
+.tollbooth/*.journal
+app/data/
+mcp/dist/
+agent/dist/
+*.db

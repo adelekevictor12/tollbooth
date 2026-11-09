@@ -1,0 +1,22 @@
+{
+  "name": "tollbooth-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A buyer agent for the Tollbooth marketplace: discovers APIs via MCP, pays via PayPal, calls them through the metered gateway.",
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "smoke": "tsx src/smoke.ts",
+    "start": "tsx src/agent.ts",
+    "agent": "tsx src/agent.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.60.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

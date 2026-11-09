@@ -1,0 +1,20 @@
+{
+  "name": "tollbooth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tollbooth — the cash register for the AI-agent API economy. PayPal AI Hackathon 2026.",
+  "workspaces": [
+    "app",
+    "mcp",
+    "agent"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "npm run dev -w app",
+    "dev:mcp": "npm run dev -w mcp",
+    "demo": "npm run demo -w agent",
+    "agent": "npm run start -w agent --",
+    "seed": "curl -s -X POST http://localhost:3000/api/seed"
+  },
+  "license": "MIT"
+}

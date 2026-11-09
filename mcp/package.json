@@ -1,0 +1,20 @@
+{
+  "name": "tollbooth-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tollbooth MCP server — lets AI agents discover, pay for, and call metered APIs through PayPal.",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
