@@ -73,13 +73,13 @@ export default db;
 // ── tiny helpers ──────────────────────────────────────────────────────
 export function q<T = any>(sql: string, params: Record<string, any> = {}): T[] {
   const stmt = db.prepare(sql);
-  stmt.allowUnknownNamedParameters = true;
+  stmt.setAllowUnknownNamedParameters(true);
   return stmt.all(params as any) as T[];
 }
 
 export function run(sql: string, params: Record<string, any> = {}): number {
   const stmt = db.prepare(sql);
-  stmt.allowUnknownNamedParameters = true;
+  stmt.setAllowUnknownNamedParameters(true);
   const res = stmt.run(params as any);
   return Number(res.lastInsertRowid);
 }

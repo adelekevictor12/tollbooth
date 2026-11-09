@@ -108,7 +108,10 @@ async function run() {
   console.log("⏹ Step limit reached.");
 }
 
-run().catch((e) => {
-  console.error("❌ Agent failed:", e.message);
-  process.exit(1);
-});
+run()
+  .then(() => mcp.close())
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error("❌ Agent failed:", e.message);
+    process.exit(1);
+  });
