@@ -91,7 +91,7 @@ async function run() {
       if (block.type !== "tool_use") continue;
       console.log(`🔧 ${block.name}(${JSON.stringify(block.input).slice(0, 120)}…)`);
       try {
-        const result = await mcp.callTool({ name: block.name, arguments: block.input as Record<string, unknown> });
+        const result = await mcp.callTool({ name: block.name, arguments: block.input as Record<string, unknown> }, undefined, { timeout: 150_000 });
         const text = (result.content as any[])
           ?.filter((c: any) => c.type === "text")
           .map((c: any) => c.text)

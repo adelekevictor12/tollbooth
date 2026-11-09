@@ -13,7 +13,12 @@ import "./env.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const MCP_SERVER = path.resolve(here, "../../mcp/src/index.ts");
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite";
+/** Fallback chain (must exist under API v1): free-tier Gemini has a small
+ *  per-model daily request quota, so on quota/availability errors the agent
+ *  moves to the next model. */
+const MODEL_CHAIN = [...new Set([MODEL, "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"])];
+let modelIdx = 0;
 const TASK =
   process.argv[2] ??
   "Find a sentiment analysis API on the Tollbooth marketplace and run 3 sentiment calls on sample product reviews. Keep total spend under $5.";
@@ -64,23 +69,35 @@ const contents: any[] = [{ role: "user", parts: [{ text: TASK }] }];
 const text = (r: any) =>
   (r.content ?? []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
 
-/** generateContent with tolerance for 503 demand spikes (no silent SDK retries). */
+/** generateContent with tolerance for 503 demand spikes, quota limits (429), and retired models (404). */
 async function generate(contents: any[], config: any) {
   let lastErr: any;
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-      return await Promise.race([
-        ai.models.generateContent({ model: MODEL, contents, config }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error("model call timed out after 90s")), 90_000)),
-      ]);
-    } catch (err: any) {
-      lastErr = err;
-      const msg = String(err?.message ?? err);
-      const retryable = /503|UNAVAILABLE|high demand|timed out|overload/i.test(msg);
-      console.log(`   ⚠ model call failed (${msg.slice(0, 80)}) — ${retryable ? `retry ${attempt}/4 in 8s` : "giving up"}`);
-      if (!retryable) break;
-      await new Promise((r) => setTimeout(r, 8000));
+  while (modelIdx < MODEL_CHAIN.length) {
+    const model = MODEL_CHAIN[modelIdx];
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await Promise.race([
+          ai.models.generateContent({ model, contents, config }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("model call timed out after 60s")), 60_000)),
+        ]);
+      } catch (err: any) {
+        lastErr = err;
+        const msg = String(err?.message ?? err);
+        if (/429|RESOURCE_EXHAUSTED|quota/i.test(msg)) {
+          console.log(`   ⚠ ${model}: free-tier daily quota exhausted — switching model`);
+          break; // move to next model in the chain
+        }
+        if (/404|no longer available/i.test(msg)) {
+          console.log(`   ⚠ ${model}: model unavailable — switching model`);
+          break;
+        }
+        const retryable = /503|UNAVAILABLE|high demand|timed out|overload/i.test(msg);
+        console.log(`   ⚠ ${model} failed (${msg.slice(0, 70)}) — ${retryable ? `retry ${attempt}/2` : "switching model"}`);
+        if (!retryable) break;
+        await new Promise((r) => setTimeout(r, 5000));
+      }
     }
+    modelIdx++;
   }
   throw lastErr;
 }
@@ -112,7 +129,7 @@ async function run() {
     for (const call of calls) {
       console.log(`🔧 ${call.name}(${JSON.stringify(call.args ?? {}).slice(0, 120)}…)`);
       try {
-        const result = await mcp.callTool({ name: call.name ?? "unknown", arguments: (call.args ?? {}) as Record<string, unknown> });
+        const result = await mcp.callTool({ name: call.name ?? "unknown", arguments: (call.args ?? {}) as Record<string, unknown> }, undefined, { timeout: 150_000 });
         const out = text(result) || "(empty)";
         console.log(`   ↳ ${out.slice(0, 200).replace(/\n/g, " ")}`);
         resultParts.push({ functionResponse: { name: call.name ?? "unknown", response: { result: out.slice(0, 8000) } } });
