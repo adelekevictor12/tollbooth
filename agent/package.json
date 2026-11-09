@@ -7,11 +7,14 @@
   "scripts": {
     "demo": "tsx src/demo.ts",
     "smoke": "tsx src/smoke.ts",
-    "start": "tsx src/agent.ts",
-    "agent": "tsx src/agent.ts"
+    "start": "tsx src/start.ts",
+    "agent": "tsx src/start.ts",
+    "start:gemini": "tsx src/gemini.ts",
+    "start:anthropic": "tsx src/agent.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0",
+    "@google/genai": "^3.0.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "zod": "^3.23.8"
   },

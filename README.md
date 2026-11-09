@@ -30,7 +30,8 @@ npm run dev                 # → http://localhost:3000
 npm run demo                # full autonomous purchase journey
 
 # Terminal 3 (optional) — the LLM-driven autonomous buyer agent
-cd agent && ANTHROPIC_API_KEY=sk-... npm run start -- "Find a sentiment API and run 3 calls. Budget $5."
+#   works with a Gemini key (free: aistudio.google.com) OR an Anthropic key
+cd agent && GEMINI_API_KEY=... npm run start -- "Find a sentiment API and run 3 calls. Budget $5."
 ```
 
 Open **http://localhost:3000/dev** before running the demo — watch revenue, usage, and agent purchases update live.
@@ -104,7 +105,7 @@ See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for th
 
 - **PayPal** — Orders API (agent-initiated credit-pack purchases), webhooks (`PAYMENT.CAPTURE.COMPLETED` → automatic credit top-up), Payouts API (developer earnings withdrawal), sandbox credentials throughout. Mock mode exists purely so judges can run everything with zero setup.
 - **APIMatic** — the supply-side engine: Transformer (spec normalization from any format), Codegen API (typed multi-language SDKs per listing), Code Context / context plugins (the LLM-legible `llms.txt` served to agents via `tb_get_api_context`). Endpoint URLs are configurable via env (`APIMATIC_TRANSFORM_URL` / `APIMATIC_CODEGEN_URL`) — point them at your account's API docs.
-- **AI** — the buyer agent is Claude (`@anthropic-ai/sdk`) driving the Tollbooth MCP server as its tool surface; discovery uses the agent-legible context files; the marketplace UI updates live as agents purchase and consume.
+- **AI** — the buyer agent runs on the LLM of your choice: **Gemini** (`GEMINI_API_KEY`, default `gemini-2.5-flash`) or **Claude** (`ANTHROPIC_API_KEY`) — driving the Tollbooth MCP server as its tool surface; discovery uses the agent-legible context files; the marketplace UI updates live as agents purchase and consume.
 
 ## Submission checklist mapping
 

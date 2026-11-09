@@ -15,7 +15,7 @@ const mcp = new Client({ name: "tollbooth-smoke", version: "1.0.0" });
 const transport = new StdioClientTransport({
   command: process.execPath,
   args: ["--import", "tsx", MCP_SERVER],
-  env: { ...process.env },
+  env: { ...process.env } as Record<string, string>,
 });
 await mcp.connect(transport);
 

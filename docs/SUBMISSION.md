@@ -46,7 +46,7 @@ A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 cal
 
 - PayPal REST APIs: Orders, Webhooks, Payouts (sandbox)
 - APIMatic: Transformer, Codegen API, Code Context
-- Anthropic Claude API (autonomous buyer agent), Model Context Protocol (MCP)
+- AI: Gemini (Google AI Studio) autonomous buyer agent — Claude also supported — and the Model Context Protocol (MCP)
 - Next.js, TypeScript, node:sqlite
 
 ## Judge run instructions (also in README)
