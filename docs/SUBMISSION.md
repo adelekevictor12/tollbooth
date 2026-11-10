@@ -59,7 +59,7 @@ npm run demo               # terminal 2 — full agent purchase journey
 npm run smoke              # terminal 3 — verifies the MCP tool surface
 ```
 
-Hosted demo: _(Render URL after deploy)_
+Hosted demo: _(Render URL after deploy — the repo ships a blueprint: Render → New → Blueprint → import repo; secrets optional, mock mode works with zero credentials. Paste the URL here and in the Devpost form.)_
 
 ## Checklist
 

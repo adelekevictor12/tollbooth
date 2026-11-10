@@ -61,6 +61,16 @@ Then just ask Claude: *"Search the Tollbooth marketplace for a sentiment API, bu
 
 APIMatic likewise degrades gracefully: without `APIMATIC_API_KEY`, listings use the built-in local context generator; with a key, the APIMatic **Transformer** normalizes specs and the **Codegen API** produces downloadable SDKs per listing.
 
+## Deploy (Render)
+
+The repo ships a Render blueprint ([render.yaml](render.yaml)) — the hosted demo is a two-minute setup:
+
+1. Render dashboard → **New → Blueprint** → pick this repo.
+2. Leave the prompted secrets blank for a **zero-credential mock demo**, or paste PayPal sandbox keys (`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PAYEE_EMAIL`) for real sandbox payments.
+3. Done — the app self-seeds the demo listing at boot (ephemeral disk is fine: the SQLite DB is rebuilt on every deploy via `app/instrumentation.ts`).
+
+To enable webhook-driven credit top-up on the hosted instance, add a webhook in the PayPal developer dashboard pointing at `https://<your-render-url>/api/webhooks/paypal` (event `PAYMENT.CAPTURE.COMPLETED`) and set `PAYPAL_WEBHOOK_ID`.
+
 ## Environment variables
 
 See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for the LLM agent). Nothing is required for mock mode; add keys to go live:
@@ -113,6 +123,7 @@ See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for th
 - ✅ Meaningful AI: autonomous Claude agent + agent-native discovery/docs
 - ✅ Working prototype: `npm run demo` (zero keys) or sandbox mode with credentials
 - ✅ Public repo, MIT license, complete run instructions
+- ✅ Hosted demo: Render blueprint in [render.yaml](render.yaml) (self-seeding, zero-credential default)
 - 🎬 Demo video: see `docs/SUBMISSION.md` for the script
 
 ## License
