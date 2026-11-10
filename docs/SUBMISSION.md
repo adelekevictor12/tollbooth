@@ -61,13 +61,13 @@ npm run demo               # terminal 2 — full agent purchase journey
 npm run smoke              # terminal 3 — verifies the MCP tool surface
 ```
 
-Hosted demo: _(Render URL after deploy — the repo ships a blueprint: Render → New → Blueprint → import repo; secrets optional, mock mode works with zero credentials. Paste the URL here and in the Devpost form.)_
+Hosted demo: **https://tollbooth-gljd.onrender.com** — live PayPal sandbox payments (verified end-to-end: agent purchase → capture → metered gateway calls). Free tier: sleeps after ~15 min idle, first load may take ~30s.
 
 ## Checklist
 
-- [ ] Public repo, MIT LICENSE visible in About section
-- [ ] Hosted demo URL on Render (or repo-only run instructions)
-- [ ] Video <3 min on YouTube, public, linked in submission
+- [x] Public repo, MIT LICENSE visible in About section
+- [x] Hosted demo URL on Render — https://tollbooth-gljd.onrender.com (sandbox mode, self-seeding)
+- [ ] Video <3 min on YouTube, public, linked in submission — captions ready in docs/captions.srt
 - [ ] Text description above pasted
 - [ ] Tools identified
 - [ ] Submit before Nov 12 12:00pm PST
