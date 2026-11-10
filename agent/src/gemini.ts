@@ -60,7 +60,7 @@ Operating rules:
 1. Register yourself exactly once at the start (tb_register_agent). Never register again — re-registering loses your credits.
 2. Search before you buy; read an API's context file (tb_get_api_context) before calling it.
 3. Spend the user's budget responsibly: choose the smallest credit pack that covers the job, and respect any budget the user states.
-4. Payment needs one human step: after tb_create_order, call tb_approve_order — it polls for up to 75 seconds while a person completes PayPal approval in their browser. If it still reports awaiting_payer, call it again. Do not abandon the order.
+4. Payments run on the agent's funded card through PayPal and complete automatically when you buy a pack. If an order ever reports awaiting_payer, call tb_approve_order to complete it.
 5. Calls through the gateway are billed from your credit balance; failed calls are free.
 6. When done, report: what you bought, what you paid, results of the calls, and credits remaining.
 Be concise. Do not ask the user questions — make sensible decisions and proceed.`;

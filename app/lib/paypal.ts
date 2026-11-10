@@ -59,12 +59,64 @@ export interface CreatedOrder {
   paypalOrderId: string;
   approveUrl: string;
   mock: boolean;
+  /** True when the payment completed at creation (agent card flow). */
+  completed: boolean;
 }
+
+/**
+ * AGENT CARD FLOW (default in sandbox when PAYPAL_AGENT_CARD=true):
+ * the agent buys with its own funded payment card through PayPal's Orders
+ * API (payment_source.card) — the order creates AND captures in one call,
+ * fully autonomous, no browser approval step. Set PAYPAL_AGENT_CARD=false
+ * to use the PayPal-wallet flow where a human approves via the approve URL.
+ */
+export const agentCardEnabled = (process.env.PAYPAL_AGENT_CARD ?? "true") !== "false";
 
 export async function createOrder(amountCents: number, packName: string): Promise<CreatedOrder> {
   if (payPalMode === "mock") {
     const id = "MOCK-" + crypto.randomUUID().slice(0, 8).toUpperCase();
-    return { paypalOrderId: id, approveUrl: `mock://${id}/${packName}`, mock: true };
+    return { paypalOrderId: id, approveUrl: `mock://${id}/${packName}`, mock: true, completed: false };
+  }
+
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  // Marketplace model: when a seller account is configured, payments route
+  // directly to the API seller (payee) instead of the platform facilitator.
+  const payeeEmail = process.env.PAYPAL_PAYEE_EMAIL;
+  const requestId = "tb-" + crypto.randomUUID();
+
+  if (agentCardEnabled) {
+    const json = await pp<any>("/v2/checkout/orders", {
+      method: "POST",
+      headers: { "PayPal-Request-Id": requestId },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [
+          {
+            reference_id: packName,
+            description: `Tollbooth credit pack: ${packName}`,
+            amount: { currency_code: "USD", value: (amountCents / 100).toFixed(2) },
+            ...(payeeEmail ? { payee: { email_address: payeeEmail } } : {}),
+          },
+        ],
+        // The agent's own funded payment card — PayPal processes it directly,
+        // so the order completes with no payer browser session at all.
+        payment_source: {
+          card: {
+            name: process.env.PAYPAL_AGENT_CARD_NAME ?? "Tollbooth Agent",
+            number: process.env.PAYPAL_AGENT_CARD_NUMBER ?? "4012001037141112",
+            expiry: process.env.PAYPAL_AGENT_CARD_EXPIRY ?? "2030-12",
+            security_code: process.env.PAYPAL_AGENT_CARD_CVV ?? "123",
+            billing_address: { country_code: "US" },
+          },
+        },
+      }),
+    });
+    return {
+      paypalOrderId: json.id,
+      approveUrl: "",
+      mock: false,
+      completed: json.status === "COMPLETED",
+    };
   }
 
   const json = await pp<any>("/v2/checkout/orders", {
@@ -76,14 +128,23 @@ export async function createOrder(amountCents: number, packName: string): Promis
           reference_id: packName,
           description: `Tollbooth credit pack: ${packName}`,
           amount: { currency_code: "USD", value: (amountCents / 100).toFixed(2) },
+          ...(payeeEmail ? { payee: { email_address: payeeEmail } } : {}),
         },
       ],
       // Agent-initiated purchase; the payer approves via the returned link.
-      payment_source: { paypal: {} },
+      payment_source: {
+        paypal: {
+          experience_context: {
+            return_url: `${appUrl}/dev?paid=1`,
+            cancel_url: `${appUrl}/dev?cancelled=1`,
+            user_action: "PAY_NOW",
+          },
+        },
+      },
     }),
   });
   const approve = json.links?.find((l: any) => l.rel === "payer-action" || l.rel === "approve")?.href ?? "";
-  return { paypalOrderId: json.id, approveUrl: approve, mock: false };
+  return { paypalOrderId: json.id, approveUrl: approve, mock: false, completed: false };
 }
 
 /** Simulate payer approval + capture. Mock mode only. */

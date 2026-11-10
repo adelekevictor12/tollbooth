@@ -20,7 +20,7 @@ AI agents are about to consume millions of APIs, but the commerce layer for that
 
 1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. APIMatic's Transformer normalizes it and Codegen generates typed TypeScript + Python SDKs; Tollbooth also produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation.
 2. **Discover (MCP):** The API is listed in the marketplace and exposed to any AI agent through the Tollbooth MCP server — search the catalog, read an API's context, compare per-call pricing.
-3. **Pay (PayPal):** The agent buys credit packs via agent-initiated PayPal Orders. Payment capture arrives by webhook (`PAYMENT.CAPTURE.COMPLETED`) and credits top up automatically. Every call through the Tollbooth gateway is metered and billed from the agent's balance (failed calls are never billed). Developers withdraw earnings via PayPal Payouts.
+3. **Pay (PayPal):** The agent buys credit packs paying with its own funded card through the PayPal Orders API (`payment_source.card`) — the order is created and captured in a single autonomous call, and the payment routes directly to the API seller's account (marketplace payee). Every call through the Tollbooth gateway is metered and billed from the agent's balance (failed calls are never billed). A PayPal-wallet mode with human buyer approval is also supported. Developers withdraw earnings via PayPal Payouts.
 
 **The demo (in the video):**
 A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 calls, keep spend under $5."* With no human involvement it searches the marketplace via MCP, reads the API's agent-legible context file, creates a PayPal order for a 500-credit pack, captures payment, receives its API key, and calls the API through the metered gateway — while the developer dashboard shows revenue accruing in real time.
@@ -38,7 +38,7 @@ A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 cal
 |---|---|
 | 0:00–0:20 | Problem: "AI agents will consume millions of APIs. Today they can't discover them, can't read them, and can't pay for them. Humans hand-copy API keys — that doesn't scale to machines." |
 | 0:20–0:55 | Supply side (screen: app + dashboard): paste OpenAPI spec URL → APIMatic transform + SDK generation + context file → listing live with per-call pricing. Show the context file — "this is what agents read instead of HTML docs." |
-| 0:55–2:10 | Demand side (screen: terminal): the Claude agent gets the mission. Show it call tb_search_apis, tb_get_api_context, tb_create_order — the PayPal order appears — payment captured — agent calls the API through the gateway, metered. |
+| 0:55–2:10 | Demand side (screen: terminal): the agent gets the mission. Show it call tb_search_apis, tb_get_api_context, tb_create_order — the PayPal order completes with a real sandbox capture (agent card) — credits land — agent calls the API through the gateway, metered. Zero human involvement. |
 | 2:10–2:40 | Split screen: developer dashboard updating live (revenue, usage, agent purchases). Payout via PayPal. |
 | 2:40–2:55 | Tagline: "Every API, ready for the machine economy. Tollbooth." GitHub URL on screen. |
 

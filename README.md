@@ -103,7 +103,7 @@ See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for th
 
 ## How each technology is used
 
-- **PayPal** — Orders API (agent-initiated credit-pack purchases), webhooks (`PAYMENT.CAPTURE.COMPLETED` → automatic credit top-up), Payouts API (developer earnings withdrawal), sandbox credentials throughout. Mock mode exists purely so judges can run everything with zero setup.
+- **PayPal** — Orders API with two payment modes: **agent-card flow** (default in sandbox: the agent pays with its own funded card via `payment_source.card` — the order creates *and captures* in one call, fully autonomous, no browser) and **PayPal-wallet flow** (`PAYPAL_AGENT_CARD=false`: human approves via the PayPal checkout URL, capture completes by webhook). Plus Payouts API (developer earnings withdrawal) and marketplace payee routing (`PAYPAL_PAYEE_EMAIL` — payments go directly to the API seller's account). Mock mode exists purely so judges can run everything with zero setup.
 - **APIMatic** — the supply-side engine: Transformer (spec normalization from any format), Codegen API (typed multi-language SDKs per listing), Code Context / context plugins (the LLM-legible `llms.txt` served to agents via `tb_get_api_context`). Endpoint URLs are configurable via env (`APIMATIC_TRANSFORM_URL` / `APIMATIC_CODEGEN_URL`) — point them at your account's API docs.
 - **AI** — the buyer agent runs on the LLM of your choice: **Gemini** (`GEMINI_API_KEY`, default `gemini-3.8-flash`) or **Claude** (`ANTHROPIC_API_KEY`) — driving the Tollbooth MCP server as its tool surface; discovery uses the agent-legible context files; the marketplace UI updates live as agents purchase and consume.
 

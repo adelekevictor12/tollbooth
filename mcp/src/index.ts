@@ -91,14 +91,14 @@ server.tool(
 
 server.tool(
   "tb_create_order",
-  "Create a PayPal order to buy a credit pack. Returns the order id + approve URL.",
+  "Buy a credit pack, paying with the agent's funded card through PayPal. In agent-card mode the payment captures immediately and credits are added on success. Returns the order id, amount, and status.",
   { pack: z.enum(["starter", "pro", "mega"]).describe("Which credit pack to buy") },
   async ({ pack }) => {
     const json = await api("/api/orders", { method: "POST", body: JSON.stringify({ pack }) });
     return {
       content: [{
         type: "text",
-        text: `Order ${json.orderId} created for ${json.amountUsd} (${json.credits} credits). PayPal order: ${json.paypalOrderId}. ${json.next}`,
+        text: `Order ${json.orderId} (${json.pack}, ${json.amountUsd}, ${json.credits} credits) — status: ${json.status}. Payment method: ${json.paymentMethod}. ${json.next}`,
       }],
     };
   }
