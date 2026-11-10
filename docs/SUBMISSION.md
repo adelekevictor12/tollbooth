@@ -61,7 +61,7 @@ npm run demo               # terminal 2 — full agent purchase journey
 npm run smoke              # terminal 3 — verifies the MCP tool surface
 ```
 
-Hosted demo: **https://tollbooth-gljd.onrender.com** — live PayPal sandbox payments (verified end-to-end: agent purchase → capture → metered gateway calls). Free tier: sleeps after ~15 min idle, first load may take ~30s.
+Hosted demo: **https://tollbooth-gljd.onrender.com** — live PayPal sandbox payments, webhook-verified (PAYMENT.CAPTURE.COMPLETED). Verified end-to-end: agent purchase → capture → metered gateway calls. Free tier: sleeps after ~15 min idle (first load may take ~30s), and the demo data resets on each service restart (ephemeral disk) — the marketplace always re-seeds itself.
 
 ## Checklist
 
