@@ -13,6 +13,7 @@
     "dev": "npm run dev -w app",
     "dev:mcp": "npm run dev -w mcp",
     "demo": "npm run demo -w agent",
+    "smoke": "npm run smoke -w agent",
     "agent": "npm run start -w agent --",
     "seed": "curl -s -X POST http://localhost:3000/api/seed"
   },

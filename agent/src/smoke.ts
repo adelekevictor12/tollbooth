@@ -39,7 +39,7 @@ console.log("   ↳", text(await mcp.callTool({ name: "tb_list_packs", arguments
 console.log("\n5. tb_create_order (starter)");
 const orderOut = text(await mcp.callTool({ name: "tb_create_order", arguments: { pack: "starter" } }));
 console.log("   ↳", orderOut);
-const orderId = Number(orderOut.match(/Order (\d+) created/)?.[1] ?? 1);
+const orderId = Number(orderOut.match(/Order (\d+)/)?.[1] ?? 1);
 
 console.log("\n6. tb_approve_order");
 console.log("   ↳", text(await mcp.callTool({ name: "tb_approve_order", arguments: { orderId } })).replace(/\n/g, " ").slice(0, 120));

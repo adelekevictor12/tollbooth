@@ -53,8 +53,9 @@ async function main() {
 
   // 5. Approve + capture
   const approve = await api(`/api/orders/${order.orderId}/approve`, { method: "POST" });
+  const creditsAdded = approve.creditsAdded ?? approve.credits;
   if (approve.status === "completed") {
-    log("5", `Payment captured ✓ — balance topped up by ${approve.creditsAdded} credits`);
+    log("5", `Payment captured ✓ — balance topped up by ${creditsAdded} credits`);
   } else {
     log("5", `Awaiting payer approval — open in a browser, then re-run: ${approve.approveUrl}`);
     return;
