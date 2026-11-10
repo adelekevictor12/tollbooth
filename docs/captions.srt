@@ -1,0 +1,75 @@
+1
+00:00:00,000 --> 00:00:06,000
+AI agents will consume millions of APIs.
+
+2
+00:00:06,000 --> 00:00:14,000
+They can't discover them. Can't read them. Can't pay for them.
+
+3
+00:00:14,000 --> 00:00:22,000
+Tollbooth is the missing commerce layer for the machine economy.
+
+4
+00:00:22,000 --> 00:00:30,000
+A developer pastes an OpenAPI spec…
+
+5
+00:00:30,000 --> 00:00:40,000
+…and gets an SDK plus an agent-readable context file — docs machines can read.
+
+6
+00:00:40,000 --> 00:00:48,000
+The listing goes live with per-call pricing.
+
+7
+00:00:48,000 --> 00:00:56,000
+Now the demand side. An AI agent gets a mission:
+
+8
+00:00:56,000 --> 00:01:04,000
+"Find a sentiment API. Run 3 calls. Stay under $5."
+
+9
+00:01:04,000 --> 00:01:12,000
+It searches the marketplace via MCP…
+
+10
+00:01:12,000 --> 00:01:20,000
+…reads the context file…
+
+11
+00:01:20,000 --> 00:01:30,000
+…creates a $5 PayPal order for 500 credits.
+
+12
+00:01:30,000 --> 00:01:38,000
+PayPal captures the payment — no browser, no human.
+
+13
+00:01:38,000 --> 00:01:46,000
+Credits land instantly.
+
+14
+00:01:46,000 --> 00:01:56,000
+Every call is metered: 2¢ each. Failed calls are never billed.
+
+15
+00:01:56,000 --> 00:02:06,000
+The developer watches revenue and usage update live.
+
+16
+00:02:06,000 --> 00:02:14,000
+Earnings pay out to the seller's PayPal account.
+
+17
+00:02:14,000 --> 00:02:22,000
+Zero humans touched this transaction.
+
+18
+00:02:22,000 --> 00:02:34,000
+Every API, ready for the machine economy.
+
+19
+00:02:34,000 --> 00:02:50,000
+Tollbooth — github.com/adelekevictor12/tollbooth

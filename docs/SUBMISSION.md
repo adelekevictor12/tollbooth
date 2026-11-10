@@ -18,7 +18,7 @@ AI agents are about to consume millions of APIs, but the commerce layer for that
 
 **How it works**
 
-1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. APIMatic's Transformer normalizes it and Codegen generates typed TypeScript + Python SDKs; Tollbooth also produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation.
+1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. Tollbooth's publish pipeline is built on APIMatic's Transformer and Codegen APIs — it normalizes the spec and generates typed multi-language SDKs — and produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation. It ships with a key-optional built-in generator so judges can publish with zero setup; adding `APIMATIC_API_KEY` switches transform + SDK generation to APIMatic's live APIs with no code changes.
 2. **Discover (MCP):** The API is listed in the marketplace and exposed to any AI agent through the Tollbooth MCP server — search the catalog, read an API's context, compare per-call pricing.
 3. **Pay (PayPal):** The agent buys credit packs paying with its own funded card through the PayPal Orders API (`payment_source.card`) — the order is created and captured in a single autonomous call, and the payment routes directly to the API seller's account (marketplace payee). Every call through the Tollbooth gateway is metered and billed from the agent's balance (failed calls are never billed). A PayPal-wallet mode with human buyer approval is also supported. Developers withdraw earnings via PayPal Payouts.
 
@@ -34,6 +34,8 @@ A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 cal
 
 ## Video script (under 3 minutes)
 
+No-voiceover version: the beats below are realized as on-screen captions (full track in [captions.srt](captions.srt), shot plan in [VIDEO.md](VIDEO.md)).
+
 | Time | Beat |
 |---|---|
 | 0:00–0:20 | Problem: "AI agents will consume millions of APIs. Today they can't discover them, can't read them, and can't pay for them. Humans hand-copy API keys — that doesn't scale to machines." |
@@ -45,7 +47,7 @@ A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 cal
 ## Tools used (required field)
 
 - PayPal REST APIs: Orders, Webhooks, Payouts (sandbox)
-- APIMatic: Transformer, Codegen API, Code Context
+- APIMatic: Transformer + Codegen API integration (endpoint-configurable, key-optional local fallback) + Code Context-style llms.txt generation
 - AI: Gemini (Google AI Studio) autonomous buyer agent — Claude also supported — and the Model Context Protocol (MCP)
 - Next.js, TypeScript, node:sqlite
 

@@ -25,10 +25,11 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "24.21.0"
-      # Zero-credential default: mock payments. Switch to "sandbox" (and set
-      # the client id/secret below) for real PayPal sandbox captures.
+      # Payments mode — leave BLANK for auto: pasted sandbox credentials →
+      # real sandbox payments; no credentials → zero-key mock mode. Set "mock"
+      # explicitly only if you want mock despite having credentials.
       - key: PAYPAL_MODE
-        value: mock
+        sync: false
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET
