@@ -1,6 +1,6 @@
 # Devpost submission draft — Tollbooth
 
-*(Fill in the video URL after recording. Submit before Nov 12, 12:00pm PST.)*
+*(Fill in the video URL after recording — shot-by-shot plan in [VIDEO.md](VIDEO.md). Submit before Nov 12, 12:00pm PST.)*
 
 ---
 
