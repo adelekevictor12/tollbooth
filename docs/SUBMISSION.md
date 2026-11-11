@@ -44,6 +44,54 @@ No-voiceover version: the beats below are realized as on-screen captions (full t
 | 2:10–2:40 | Split screen: developer dashboard updating live (revenue, usage, agent purchases). Payout via PayPal. |
 | 2:40–2:55 | Tagline: "Every API, ready for the machine economy. Tollbooth." GitHub URL on screen. |
 
+## About the project (Devpost story field)
+
+*(The field asks for inspiration / what you learned / how you built it / challenges — paste as-is, Markdown.)*
+
+### Inspiration
+
+AI agents are about to make millions of API calls a day — but the commerce layer for that flow doesn't exist. Today, when an agent needs an API, a human has to find the provider, read HTML docs meant for humans, sign up, copy an API key into a config file, and paste in a credit card. That works when you have five APIs and one developer. It doesn't scale to machines.
+
+I kept hitting the same three gaps, so I built the layer that closes them: agents can't **discover** APIs (no catalog speaks their language), can't **read** them (HTML docs are noise to an LLM), and can't **pay** for them (no per-call billing exists for non-human buyers). Tollbooth is a marketplace that fixes all three: paste an OpenAPI spec, and your API becomes discoverable via MCP, documented in an agent-legible context file, and monetized per call through PayPal — with no human in the transaction loop.
+
+### What it does
+
+A developer pastes an OpenAPI spec; Tollbooth normalizes it, generates an SDK plus an `llms.txt`-style context file, and lists the API with per-call pricing. On the other side, an AI agent connects through the Tollbooth MCP server, searches the catalog, reads the context file, buys a credit pack with its own funded card through the PayPal Orders API — order created and captured in a single autonomous call — and then consumes the API through a metered gateway where every successful call is billed from its balance and failed calls are never charged. Developers watch revenue accrue live on a dashboard and withdraw earnings via PayPal Payouts.
+
+### How I built it
+
+Three components, one monorepo:
+
+- **Marketplace + gateway** — a Next.js 16 app: listings, developer dashboard, a proxy gateway that authenticates agents (`x-api-key`), checks credits, forwards calls upstream, and meters billing per successful call. Database is `node:sqlite` — zero native dependencies.
+- **MCP server** — a standalone Model Context Protocol server exposing the agent-facing tool surface (`tb_search_apis`, `tb_get_api_context`, `tb_create_order`, `tb_call_api`, …), so any MCP-capable agent gets a marketplace as a native tool.
+- **Buyer agent** — an autonomous agent (Gemini or Claude) that takes a mission like *"find a sentiment API, run 3 calls, stay under $5"* and completes the entire purchase journey unattended. There's also a deterministic scripted demo so the journey can be shown with zero API keys.
+
+The supply side is built on APIMatic's Transformer and Codegen APIs for spec normalization and multi-language SDK generation, with a key-optional local generator fallback so judges can run everything with no setup. I also used APIMatic's CLI to generate a full developer portal for the demo API — docs, downloadable C#/TypeScript/Python SDKs, `llms.txt` agent docs, and AI context plugins — all from the same OpenAPI spec the marketplace publishes. One spec in, every artifact a developer or agent needs, out. Everything degrades gracefully: with no credentials at all, PayPal runs in a mock mode and the whole demo still works end-to-end.
+
+### Challenges I ran into
+
+**The hardest one: a browser-based checkout simply doesn't work for an agent.** My first implementation used PayPal's standard approval flow — create order, open the approve URL, buyer logs in. Besides the philosophical problem (an autonomous agent can't click through a checkout page), my sandbox facilitator account is in a region that can't receive USD, so browser checkout failed outright no matter what I tried. The fix became the most interesting part of the project: the agent-card flow — the agent pays with its own funded card via `payment_source.card` in the PayPal Orders API, so the order is created *and captured* in one API call with no browser at all, while marketplace payee routing (`PAYPAL_PAYEE_EMAIL`) sends the payment straight to the seller's account. Fully autonomous, and it fixed the regional problem as a side effect.
+
+**Webhooks as the trust backbone.** For the wallet flow where a human does approve, capture confirmation arrives via the `PAYMENT.CAPTURE.COMPLETED` webhook — which meant implementing PayPal's signature verification and registering the webhook against my deployed URL.
+
+**Making it runnable by anyone.** I wanted a judge to be able to clone and run with zero keys, so every external dependency (PayPal, APIMatic, even the LLM) has a local fallback. The hosted free-tier deployment has an ephemeral disk — so I added boot-time seeding via Next's instrumentation hook, meaning the marketplace rebuilds itself on every restart.
+
+**The long tail:** Next.js 16's `cacheComponents` conflicting with dynamic routes; `node:sqlite`'s named-parameter typings; Gemini's free-tier rate limits (solved with a model-fallback chain); and an MCP tool timeout that was shorter than a PayPal approval round-trip.
+
+### Accomplishments I'm proud of
+
+The moment the whole thing clicked: I gave the agent its mission, went to get coffee, and came back to a completed PayPal capture, a topped-up balance, three metered API calls, and a dashboard showing the revenue — with literally zero human involvement between mission and result. Watching money move because a *machine* decided to buy something is a very strange, very exciting feeling.
+
+### What I learned
+
+- **Agentic commerce is a protocol problem, not a UX problem.** Every design decision that mattered was about removing the human from the loop — payments, docs, discovery all had to become machine-native.
+- **Graceful degradation is a feature.** The zero-credential mock mode ended up making the project *more* demoable, not less impressive — and the real sandbox keys dropped in without a single code change.
+- **LLM-legible documentation is underrated.** The `llms.txt`-style context file did as much for the agent's success rate as any prompt engineering.
+
+### What's next
+
+Live PayPal (production credentials), real spec URLs from independent developers, and a Payouts schedule so the marketplace can settle to sellers automatically.
+
 ## Tools used (required field)
 
 - PayPal REST APIs: Orders, Webhooks, Payouts (sandbox)
