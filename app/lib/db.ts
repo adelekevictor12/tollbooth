@@ -11,6 +11,12 @@ mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new DatabaseSync(path.join(DATA_DIR, "tollbooth.db"), { open: true });
 
+// `next build` collects page data with many parallel workers, each importing
+// this module and running the DDL below simultaneously — without a busy
+// timeout, concurrent writes fail instantly with SQLITE_BUSY ("database is
+// locked"). Make connections wait up to 10s for the file lock instead.
+db.exec("PRAGMA busy_timeout = 10000;");
+
 db.exec(`
 CREATE TABLE IF NOT EXISTS agents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
