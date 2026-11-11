@@ -18,7 +18,7 @@ AI agents are about to consume millions of APIs, but the commerce layer for that
 
 **How it works**
 
-1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. Tollbooth's publish pipeline is built on APIMatic's Transformer and Codegen APIs — it normalizes the spec and generates typed multi-language SDKs — and produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation. It ships with a key-optional built-in generator so judges can publish with zero setup; adding `APIMATIC_API_KEY` switches transform + SDK generation to APIMatic's live APIs with no code changes. The repo's `portal/` workspace is a live APIMatic artifact: a full developer portal for the demo API — docs, downloadable C#/TypeScript/Python SDKs, `llms.txt` agent docs, and AI context plugins — generated with the APIMatic CLI from the same OpenAPI spec.
+1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. Tollbooth's publish pipeline runs live against APIMatic's APIs — the Transformer normalizes any spec format to OpenAPI 3, the Codegen API generates typed TypeScript + Python SDKs downloadable from the listing page — and produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation. (Verified end-to-end against APIMatic's cloud; a key-optional local fallback lets judges run everything with zero setup.) The repo's `portal/` workspace is a second live APIMatic artifact: a full developer portal — docs, downloadable SDKs, `llms.txt` agent docs, AI context plugins — generated with the APIMatic CLI from the same OpenAPI spec.
 2. **Discover (MCP):** The API is listed in the marketplace and exposed to any AI agent through the Tollbooth MCP server — search the catalog, read an API's context, compare per-call pricing.
 3. **Pay (PayPal):** The agent buys credit packs paying with its own funded card through the PayPal Orders API (`payment_source.card`) — the order is created and captured in a single autonomous call, and the payment routes directly to the API seller's account (marketplace payee). Every call through the Tollbooth gateway is metered and billed from the agent's balance (failed calls are never billed). A PayPal-wallet mode with human buyer approval is also supported. Developers withdraw earnings via PayPal Payouts.
 
@@ -66,7 +66,7 @@ Three components, one monorepo:
 - **MCP server** — a standalone Model Context Protocol server exposing the agent-facing tool surface (`tb_search_apis`, `tb_get_api_context`, `tb_create_order`, `tb_call_api`, …), so any MCP-capable agent gets a marketplace as a native tool.
 - **Buyer agent** — an autonomous agent (Gemini or Claude) that takes a mission like *"find a sentiment API, run 3 calls, stay under $5"* and completes the entire purchase journey unattended. There's also a deterministic scripted demo so the journey can be shown with zero API keys.
 
-The supply side is built on APIMatic's Transformer and Codegen APIs for spec normalization and multi-language SDK generation, with a key-optional local generator fallback so judges can run everything with no setup. I also used APIMatic's CLI to generate a full developer portal for the demo API — docs, downloadable C#/TypeScript/Python SDKs, `llms.txt` agent docs, and AI context plugins — all from the same OpenAPI spec the marketplace publishes. One spec in, every artifact a developer or agent needs, out. Everything degrades gracefully: with no credentials at all, PayPal runs in a mock mode and the whole demo still works end-to-end.
+The supply side runs live on APIMatic's Transformer and Codegen APIs — every published listing is normalized to OpenAPI 3 and gets real TypeScript + Python SDKs generated in APIMatic's cloud, downloadable straight from the listing page — with a key-optional local generator fallback so judges can run everything with no setup. I also used APIMatic's CLI to generate a full developer portal for the demo API — docs, downloadable C#/TypeScript/Python SDKs, `llms.txt` agent docs, and AI context plugins — all from the same OpenAPI spec the marketplace publishes. One spec in, every artifact a developer or agent needs, out. Everything degrades gracefully: with no credentials at all, PayPal runs in a mock mode and the whole demo still works end-to-end.
 
 ### Challenges I ran into
 
@@ -95,7 +95,7 @@ Live PayPal (production credentials), real spec URLs from independent developers
 ## Tools used (required field)
 
 - PayPal REST APIs: Orders, Webhooks, Payouts (sandbox)
-- APIMatic: Transformer + Codegen APIs, plus a CLI-generated developer portal (`portal/`) with downloadable SDKs (C#/TypeScript/Python), `llms.txt` agent docs, and AI context plugins
+- APIMatic: live Transformer + Codegen API integration (SDK zips generated per listing at publish time), plus a CLI-generated developer portal (`portal/`) with downloadable SDKs, `llms.txt` agent docs, and AI context plugins
 - AI: Gemini (Google AI Studio) autonomous buyer agent — Claude also supported — and the Model Context Protocol (MCP)
 - Next.js, TypeScript, node:sqlite
 

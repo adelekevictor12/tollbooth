@@ -57,13 +57,16 @@ export async function transformSpec(rawSpec: unknown, _sourceFormat = "openapi3"
 
     const res = await fetch(`${BASE}/transformations/transform-via-file`, {
       method: "POST",
-      headers: authHeaders,
+      // Accept: application/json is required — without it the API returns XML.
+      headers: { ...authHeaders, Accept: "application/json" },
       body: form,
     });
     if (!res.ok) throw new Error(`Transformer ${res.status} ${(await res.text()).slice(0, 200)}`);
     const { id } = (await res.json()) as { id: string };
 
-    const dl = await fetch(`${BASE}/transformations/${id}/converted-file`, { headers: authHeaders });
+    const dl = await fetch(`${BASE}/transformations/${id}/converted-file`, {
+      headers: { ...authHeaders, Accept: "application/json" },
+    });
     if (!dl.ok) throw new Error(`Converted-file ${dl.status}`);
     const spec = await dl.json();
     return { status: "apimatic", spec, note: "Normalized to OpenAPI 3 by APIMatic Transformer." };
