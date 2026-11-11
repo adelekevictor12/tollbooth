@@ -58,6 +58,7 @@ Then just ask Claude: *"Search the Tollbooth marketplace for a sentiment API, bu
 |---|---|---|
 | **Mock** (default) | no PayPal credentials set | Orders are simulated locally (instant approve + capture). The whole demo runs with **zero keys**. |
 | **Sandbox** | `PAYPAL_CLIENT_ID` + `PAYPAL_CLIENT_SECRET` set | Real PayPal sandbox: the agent creates an order, the payer approves via PayPal, capture completes via webhook (`PAYMENT.CAPTURE.COMPLETED`), credits top up automatically. |
+| **Live** | `PAYPAL_MODE=live` + your live app's credentials | Production PayPal (`api-m.paypal.com`): Orders, Webhooks and Payouts all switch to live endpoints. Defaults to the **wallet flow** (payer approves via PayPal). Unattended agent-card capture in live is PayPal *advanced card processing* — enable only with account approval, `PAYPAL_LIVE_AGENT_CARD=true` and real card details in env (a sandbox test card is never sent to the live API). Use your live app's webhook subscription for `PAYPAL_WEBHOOK_ID`. |
 
 APIMatic likewise degrades gracefully: without `APIMATIC_API_KEY`, listings use the built-in local context generator; with a key, the APIMatic **Transformer** normalizes specs and the **Codegen API** produces downloadable SDKs per listing.
 

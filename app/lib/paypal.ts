@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 
 /**
- * PayPal client — Orders API + webhook verification, with a local mock mode
- * so the entire demo runs with zero credentials.
+ * PayPal client — Orders API + webhook verification + Payouts, with a local
+ * mock mode so the entire demo runs with zero credentials.
  *
  * Modes (env PAYPAL_MODE):
  *   - "mock"    (default when PAYPAL_CLIENT_ID is empty): orders are created,
@@ -10,16 +10,26 @@ import crypto from "node:crypto";
  *   - "sandbox": real PayPal sandbox. Agent creates the order; the human (or
  *               sandbox buyer session) approves via the PayPal approve URL;
  *               our webhook (PAYMENT.CAPTURE.COMPLETED) tops up credits.
+ *   - "live":    production PayPal (https://api-m.paypal.com) using your live
+ *               app's credentials. Defaults to the PayPal-wallet flow (payer
+ *               approves via PayPal); unattended agent-card capture in live is
+ *               PayPal "advanced card processing" — enable it only if your
+ *               account has that approval, via PAYPAL_LIVE_AGENT_CARD=true
+ *               plus real card details (a sandbox test card is never sent to
+ *               the live API). Webhooks and Payouts use the live endpoints
+ *               automatically — set PAYPAL_WEBHOOK_ID to your LIVE app's
+ *               webhook subscription and ensure payouts are enabled.
  */
-const BASE = process.env.PAYPAL_MODE === "live"
+const MODE = (process.env.PAYPAL_MODE ?? "").trim().toLowerCase();
+const BASE = MODE === "live"
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
 
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID ?? "";
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET ?? "";
 
-export const payPalMode: "mock" | "sandbox" =
-  CLIENT_ID && (process.env.PAYPAL_MODE ?? "sandbox") !== "mock" ? "sandbox" : "mock";
+export const payPalMode: "mock" | "sandbox" | "live" =
+  CLIENT_ID && MODE !== "mock" ? (MODE === "live" ? "live" : "sandbox") : "mock";
 
 // ── OAuth ─────────────────────────────────────────────────────────────
 let tokenCache: { token: string; expires: number } | null = null;
@@ -69,8 +79,19 @@ export interface CreatedOrder {
  * API (payment_source.card) — the order creates AND captures in one call,
  * fully autonomous, no browser approval step. Set PAYPAL_AGENT_CARD=false
  * to use the PayPal-wallet flow where a human approves via the approve URL.
+ *
+ * In LIVE mode this is PayPal "advanced card processing": it requires
+ * explicit opt-in (PAYPAL_LIVE_AGENT_CARD=true) AND real card details via
+ * env — the default sandbox test card is never sent to the live API.
+ * Without that, live orders use the wallet flow.
  */
-export const agentCardEnabled = (process.env.PAYPAL_AGENT_CARD ?? "true") !== "false";
+const agentCardRequested = (process.env.PAYPAL_AGENT_CARD ?? "true") !== "false";
+export const agentCardEnabled =
+  payPalMode === "live"
+    ? agentCardRequested &&
+      process.env.PAYPAL_LIVE_AGENT_CARD === "true" &&
+      Boolean(process.env.PAYPAL_AGENT_CARD_NUMBER)
+    : agentCardRequested;
 
 export async function createOrder(amountCents: number, packName: string): Promise<CreatedOrder> {
   if (payPalMode === "mock") {

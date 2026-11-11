@@ -26,7 +26,7 @@ AI agents are about to consume millions of APIs, but the commerce layer for that
 A Claude agent is given a mission: *"Find a sentiment analysis API and run 3 calls, keep spend under $5."* With no human involvement it searches the marketplace via MCP, reads the API's agent-legible context file, creates a PayPal order for a 500-credit pack, captures payment, receives its API key, and calls the API through the metered gateway — while the developer dashboard shows revenue accruing in real time.
 
 **Technologies:**
-- PayPal: Orders API (agent-initiated checkout), Webhooks (auto credit top-up), Payouts API (developer earnings), sandbox throughout — with a zero-credentials mock mode so anyone can run the demo instantly.
+- PayPal: Orders API (agent-initiated checkout), Webhooks (auto credit top-up), Payouts API (developer earnings) — sandbox throughout, with a zero-credentials mock mode so anyone can run the demo instantly, and a production mode (`PAYPAL_MODE=live`) that switches Orders, Webhooks and Payouts to live endpoints with no code changes.
 - APIMatic: Transformer + Codegen API + Code Context — the supply-side engine that makes every listed API typed (SDKs) and machine-legible (context files).
 - AI: Claude (Anthropic API) as the autonomous buyer agent, driving the Tollbooth MCP server as its tool surface.
 

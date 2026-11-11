@@ -46,7 +46,7 @@ export default function Home() {
           </Link>
         </div>
         <div className="mt-6 flex gap-4 text-xs text-neutral-500">
-          <span className={`px-2 py-1 rounded border ${payPalMode === "sandbox" ? "border-emerald-700 text-emerald-400" : "border-neutral-700"}`}>
+          <span className={`px-2 py-1 rounded border ${payPalMode === "live" ? "border-sky-700 text-sky-400" : payPalMode === "sandbox" ? "border-emerald-700 text-emerald-400" : "border-neutral-700"}`}>
             PayPal: {payPalMode}
           </span>
           <span className={`px-2 py-1 rounded border ${apimaticEnabled ? "border-emerald-700 text-emerald-400" : "border-neutral-700"}`}>

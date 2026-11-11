@@ -29,9 +29,11 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "24.21.0"
-      # Payments mode — leave BLANK for auto: pasted sandbox credentials →
-      # real sandbox payments; no credentials → zero-key mock mode. Set "mock"
-      # explicitly only if you want mock despite having credentials.
+      # Payments mode — leave BLANK for auto: pasted credentials → real
+      # sandbox payments; no credentials → zero-key mock mode. Set "live"
+      # (with your LIVE app credentials) for production PayPal — see
+      # .env.example for live agent-card requirements. Set "mock" explicitly
+      # only if you want mock despite having credentials.
       - key: PAYPAL_MODE
         sync: false
       - key: PAYPAL_CLIENT_ID
