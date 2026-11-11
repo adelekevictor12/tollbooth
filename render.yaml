@@ -5,7 +5,11 @@
 #   2. When prompted for the (sync: false) secrets below, leave them blank
 #      for a fully-working zero-credential mock demo, or paste your PayPal
 #      sandbox keys to run real sandbox payments.
-#   3. After the first deploy, add a PayPal webhook for the Render URL
+#   3. The "tollbooth-docs" static service needs your APIMatic dashboard API
+#      key (apimatic.io → Account Settings → API Keys) — it generates the
+#      developer portal at deploy time. Leave it blank only if you delete
+#      that service from this file.
+#   4. After the first deploy, add a PayPal webhook for the Render URL
 #      (see README → "Webhooks") to enable auto credit top-up.
 #
 # Notes:
@@ -41,5 +45,18 @@ services:
       - key: PAYPAL_WEBHOOK_ID
         sync: false
       # APIMatic key unlocks live transform/SDK generation (optional).
+      - key: APIMATIC_API_KEY
+        sync: false
+
+  # Developer portal for the demo API — static site, generated at deploy time
+  # by the APIMatic CLI from portal/src (never sleeps, free).
+  - type: web
+    name: tollbooth-docs
+    runtime: static
+    buildCommand: npx -y @apimatic/cli@2 portal generate --input=portal --destination=portal/out --force --auth-key=$APIMATIC_API_KEY
+    staticPublishPath: portal/out
+    autoDeploy: true
+    envVars:
+      # Same APIMatic dashboard API key as above (Account Settings → API Keys).
       - key: APIMATIC_API_KEY
         sync: false

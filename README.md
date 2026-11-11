@@ -67,7 +67,8 @@ The repo ships a Render blueprint ([render.yaml](render.yaml)) — the hosted de
 
 1. Render dashboard → **New → Blueprint** → pick this repo.
 2. Leave the prompted secrets blank for a **zero-credential mock demo**, or paste PayPal sandbox keys (`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PAYEE_EMAIL`) for real sandbox payments.
-3. Done — the app self-seeds the demo listing at boot (ephemeral disk is fine: the SQLite DB is rebuilt on every deploy via `app/instrumentation.ts`).
+3. For the `tollbooth-docs` static service, paste your APIMatic dashboard API key — it generates the developer portal at deploy time.
+4. Done — the app self-seeds the demo listing at boot (ephemeral disk is fine: the SQLite DB is rebuilt on every deploy via `app/instrumentation.ts`). The docs portal deploys as a static site (never sleeps).
 
 To enable webhook-driven credit top-up on the hosted instance, add a webhook in the PayPal developer dashboard pointing at `https://<your-render-url>/api/webhooks/paypal` (event `PAYMENT.CAPTURE.COMPLETED`) and set `PAYPAL_WEBHOOK_ID`.
 
