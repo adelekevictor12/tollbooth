@@ -39,10 +39,10 @@ export default function Home() {
             Publish an API
           </Link>
           <Link
-            href="/dev"
+            href="/listing/sentimentscan"
             className="border border-neutral-700 px-5 py-2.5 rounded-md hover:border-amber-400 transition-colors"
           >
-            Watch an agent buy one →
+            Explore a live listing →
           </Link>
         </div>
         <div className="mt-6 flex gap-4 text-xs text-neutral-500">
