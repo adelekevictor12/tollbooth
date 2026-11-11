@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SentimentScan API",
+    "version": "1.0.0",
+    "description": "Lexicon-based sentiment analysis for short texts. Returns a polarity score from -1 (negative) to +1 (positive), a label, and per-word drivers."
+  },
+  "servers": [
+    {
+      "url": "/api/demo-upstream"
+    }
+  ],
+  "paths": {
+    "/sentiment": {
+      "post": {
+        "summary": "Score the sentiment of a piece of text",
+        "operationId": "scoreSentiment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sentiment scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "score": {
+                      "type": "number",
+                      "description": "-1..1 polarity"
+                    },
+                    "label": {
+                      "type": "string",
+                      "enum": [
+                        "positive",
+                        "neutral",
+                        "negative"
+                      ]
+                    },
+                    "drivers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "sentiment"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "sentiment",
+      "description": "Score the sentiment of short texts"
+    }
+  ]
+}

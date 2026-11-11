@@ -1,0 +1,29 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/npm/@apimatic/cli@2/apimatic.schema.json",
+  "schemaVersion": 1,
+  "portal": {
+    "site": {
+      "name": "Tollbooth"
+    },
+    "brand": {
+      "logo": {
+        "light": "static/images/logo.svg",
+        "dark": "static/images/logo-dark.svg"
+      },
+      "favicon": "static/images/favicon.ico",
+      "colors": {},
+      "colorMode": "both"
+    },
+    "navigation": {
+      "links": []
+    },
+    "ai": {
+      "pageActions": true
+    }
+  },
+  "languages": {
+    "csharp": {},
+    "typescript": {},
+    "python": {}
+  }
+}

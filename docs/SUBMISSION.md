@@ -18,7 +18,7 @@ AI agents are about to consume millions of APIs, but the commerce layer for that
 
 **How it works**
 
-1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. Tollbooth's publish pipeline is built on APIMatic's Transformer and Codegen APIs — it normalizes the spec and generates typed multi-language SDKs — and produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation. It ships with a key-optional built-in generator so judges can publish with zero setup; adding `APIMATIC_API_KEY` switches transform + SDK generation to APIMatic's live APIs with no code changes.
+1. **Publish (APIMatic):** A developer pastes an OpenAPI spec or Postman collection. Tollbooth's publish pipeline is built on APIMatic's Transformer and Codegen APIs — it normalizes the spec and generates typed multi-language SDKs — and produces an LLM-legible context file (llms.txt-style) that serves as machine-native documentation. It ships with a key-optional built-in generator so judges can publish with zero setup; adding `APIMATIC_API_KEY` switches transform + SDK generation to APIMatic's live APIs with no code changes. The repo's `portal/` workspace is a live APIMatic artifact: a full developer portal for the demo API — docs, downloadable C#/TypeScript/Python SDKs, `llms.txt` agent docs, and AI context plugins — generated with the APIMatic CLI from the same OpenAPI spec.
 2. **Discover (MCP):** The API is listed in the marketplace and exposed to any AI agent through the Tollbooth MCP server — search the catalog, read an API's context, compare per-call pricing.
 3. **Pay (PayPal):** The agent buys credit packs paying with its own funded card through the PayPal Orders API (`payment_source.card`) — the order is created and captured in a single autonomous call, and the payment routes directly to the API seller's account (marketplace payee). Every call through the Tollbooth gateway is metered and billed from the agent's balance (failed calls are never billed). A PayPal-wallet mode with human buyer approval is also supported. Developers withdraw earnings via PayPal Payouts.
 
@@ -47,7 +47,7 @@ No-voiceover version: the beats below are realized as on-screen captions (full t
 ## Tools used (required field)
 
 - PayPal REST APIs: Orders, Webhooks, Payouts (sandbox)
-- APIMatic: Transformer + Codegen API integration (endpoint-configurable, key-optional local fallback) + Code Context-style llms.txt generation
+- APIMatic: Transformer + Codegen APIs, plus a CLI-generated developer portal (`portal/`) with downloadable SDKs (C#/TypeScript/Python), `llms.txt` agent docs, and AI context plugins
 - AI: Gemini (Google AI Studio) autonomous buyer agent — Claude also supported — and the Model Context Protocol (MCP)
 - Next.js, TypeScript, node:sqlite
 

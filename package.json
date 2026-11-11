@@ -14,6 +14,8 @@
     "dev:mcp": "npm run dev -w mcp",
     "demo": "npm run demo -w agent",
     "smoke": "npm run smoke -w agent",
+    "portal": "apimatic portal generate --input=portal --destination=portal/out --force",
+    "portal:serve": "apimatic portal serve --input=portal --open",
     "agent": "npm run start -w agent --",
     "seed": "curl -s -X POST http://localhost:3000/api/seed"
   },

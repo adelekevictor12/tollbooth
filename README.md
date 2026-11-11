@@ -71,6 +71,17 @@ The repo ships a Render blueprint ([render.yaml](render.yaml)) — the hosted de
 
 To enable webhook-driven credit top-up on the hosted instance, add a webhook in the PayPal developer dashboard pointing at `https://<your-render-url>/api/webhooks/paypal` (event `PAYMENT.CAPTURE.COMPLETED`) and set `PAYPAL_WEBHOOK_ID`.
 
+## Developer portal (APIMatic)
+
+`portal/` holds an APIMatic portal project generated from the demo API's OpenAPI spec. One command rebuilds everything — the documentation site, downloadable C#/TypeScript/Python SDKs, `llms.txt` / `llms-full.txt` agent docs, and AI context plugins for coding assistants:
+
+```bash
+npm run portal          # regenerate the static portal → portal/out
+npm run portal:serve    # live-preview at http://localhost:23513
+```
+
+It's the developer-facing half of the marketplace story: the same spec a developer pastes into Tollbooth produces both the agent-facing context file (via MCP) and this human/agent-friendly portal with SDKs. Generated output (`portal/out/`) is gitignored; requires an APIMatic account (`apimatic auth login`).
+
 ## Environment variables
 
 See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for the LLM agent). Nothing is required for mock mode; add keys to go live:
@@ -110,6 +121,7 @@ See [.env.example](.env.example). Copy it to `app/.env` (and `agent/.env` for th
 | `app/` | Next.js 16 app — marketplace, developer dashboard, REST API, PayPal integration (Orders + Webhooks + Payouts), metering gateway, bundled demo API |
 | `mcp/` | Standalone MCP server (stdio) — the agent-facing tool surface |
 | `agent/` | The buyer agent: scripted demo (`npm run demo`), MCP smoke test (`npm run smoke`), and the autonomous Claude agent (`npm run start`) |
+| `portal/` | APIMatic developer portal for the demo API — docs, downloadable SDKs (C#/TypeScript/Python), `llms.txt`, and AI context plugins, all generated from the OpenAPI spec via the APIMatic CLI (`npm run portal` to rebuild, `npm run portal:serve` to preview) |
 
 ## How each technology is used
 
