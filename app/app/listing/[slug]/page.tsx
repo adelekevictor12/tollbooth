@@ -41,7 +41,7 @@ export default async function ListingPage({ params }: { params: Promise<{ slug: 
             <ul className="mt-3 text-sm space-y-2">
               {sdkLanguages.map((lang) => (
                 <li key={lang}>
-                  <a className="text-blue-400 hover:underline" href={`/sdks/${listing.slug}/${listing.slug}-${lang}-sdk.zip`}>
+                  <a className="text-blue-400 hover:underline" href={`/api/sdks/${listing.slug}/${lang}`}>
                     ↓ {listing.slug}-{lang}-sdk.zip
                   </a>
                 </li>

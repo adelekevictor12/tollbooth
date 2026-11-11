@@ -1,31 +1,39 @@
 /**
  * APIMatic integration — the engine of Tollbooth's supply side.
  *
- * When APIMATIC_API_KEY is set, listing creation runs the pipeline:
- *   1. APIMatic Transformer — normalizes any spec format (Postman collection,
- *      Swagger 2.0, OpenAPI 3.x, RAML, API Blueprint...) into OpenAPI 3.
- *   2. APIMatic Codegen API — generates typed SDKs (TypeScript + Python here)
- *      for the listed API, exposed as downloads on the listing page.
- *   3. APIMatic Code Context / Context Plugins — LLM-ready context artifacts
- *      that agents consume through our MCP server.
+ * When APIMATIC_API_KEY is set, listing creation runs the live pipeline
+ * (endpoints verified against APIMatic's public API, the same one their CLI
+ * uses — base https://api.apimatic.io, auth `Authorization: X-Auth-Key <key>`):
+ *   1. POST /transformations/transform-via-file        (multipart: file, export_format)
+ *      → GET /transformations/{id}/converted-file      (normalized OpenAPI 3 spec)
+ *   2. POST /code-generations/generate-via-file        (multipart: file, template)
+ *      → GET /code-generations/{id}/generated-sdk      (SDK zip)
+ *      for TypeScript (TS_GENERIC_LIB) and Python (PYTHON_GENERIC_LIB).
  *
  * Without a key, `status: "local"` is returned and we fall back to the local
  * context generator (lib/context.ts) so the platform still works end-to-end.
- *
- * NOTE ON ENDPOINTS: the exact Transformer/Codegen REST endpoints and request
- * shapes come from APIMatic's API docs (https://www.apimatic.io/api-portal).
- * They are configurable via APIMATIC_TRANSFORM_URL / APIMATIC_CODEGEN_URL so
- * you can point at the documented values without code changes. Verify against
- * your APIMatic dashboard's API docs when you enable live generation.
  */
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const KEY = process.env.APIMATIC_API_KEY ?? "";
-const TRANSFORM_URL = process.env.APIMATIC_TRANSFORM_URL ?? "https://api.apimatic.com/transform";
-const CODEGEN_URL = process.env.APIMATIC_CODEGEN_URL ?? "https://api.apimatic.com/codegen";
+const BASE = (process.env.APIMATIC_BASE_URL ?? "https://api.apimatic.io").replace(/\/$/, "");
 
 export const apimaticEnabled = KEY.length > 0;
+
+const authHeaders: Record<string, string> = { Authorization: `X-Auth-Key ${KEY}` };
+
+/** SDK templates → friendly language names (as surfaced on listing pages). */
+const SDK_TEMPLATES: Array<{ lang: string; template: string }> = [
+  { lang: "typescript", template: "TS_GENERIC_LIB" },
+  { lang: "python", template: "PYTHON_GENERIC_LIB" },
+];
+
+function specToFile(rawSpec: unknown): File {
+  const content = typeof rawSpec === "string" ? rawSpec : JSON.stringify(rawSpec, null, 2);
+  // APIMatic auto-detects the input format from the file content.
+  return new File([content], "spec.json", { type: "application/json" });
+}
 
 export interface TransformResult {
   status: "apimatic" | "local";
@@ -34,7 +42,7 @@ export interface TransformResult {
 }
 
 /** Step 1: normalize any spec format to OpenAPI 3 via APIMatic Transformer. */
-export async function transformSpec(rawSpec: unknown, sourceFormat = "openapi3"): Promise<TransformResult> {
+export async function transformSpec(rawSpec: unknown, _sourceFormat = "openapi3"): Promise<TransformResult> {
   if (!apimaticEnabled) {
     return {
       status: "local",
@@ -43,13 +51,21 @@ export async function transformSpec(rawSpec: unknown, sourceFormat = "openapi3")
     };
   }
   try {
-    const res = await fetch(TRANSFORM_URL, {
+    const form = new FormData();
+    form.append("file", specToFile(rawSpec));
+    form.append("export_format", "OpenApi3Json");
+
+    const res = await fetch(`${BASE}/transformations/transform-via-file`, {
       method: "POST",
-      headers: { Authorization: KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ format: sourceFormat, specification: rawSpec }),
+      headers: authHeaders,
+      body: form,
     });
-    if (!res.ok) throw new Error(`Transformer ${res.status}`);
-    const spec = await res.json();
+    if (!res.ok) throw new Error(`Transformer ${res.status} ${(await res.text()).slice(0, 200)}`);
+    const { id } = (await res.json()) as { id: string };
+
+    const dl = await fetch(`${BASE}/transformations/${id}/converted-file`, { headers: authHeaders });
+    if (!dl.ok) throw new Error(`Converted-file ${dl.status}`);
+    const spec = await dl.json();
     return { status: "apimatic", spec, note: "Normalized to OpenAPI 3 by APIMatic Transformer." };
   } catch (err) {
     return {
@@ -71,22 +87,31 @@ export async function generateSdks(slug: string, spec: any): Promise<SdkResult> 
   if (!apimaticEnabled) {
     return { status: "local", languages: [], note: "Set APIMATIC_API_KEY to generate TypeScript + Python SDKs." };
   }
-  const languages = ["typescript", "python"];
+  const done: string[] = [];
   try {
-    for (const lang of languages) {
-      const res = await fetch(CODEGEN_URL, {
+    const dir = path.join(process.cwd(), "data", "sdks", slug);
+    await mkdir(dir, { recursive: true });
+    for (const { lang, template } of SDK_TEMPLATES) {
+      const form = new FormData();
+      form.append("file", specToFile(spec));
+      form.append("template", template);
+
+      const res = await fetch(`${BASE}/code-generations/generate-via-file`, {
         method: "POST",
-        headers: { Authorization: KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ template: lang, specification: spec }),
+        headers: { ...authHeaders, Accept: "application/json" },
+        body: form,
       });
-      if (!res.ok) throw new Error(`Codegen(${lang}) ${res.status}`);
-      const buf = Buffer.from(await res.arrayBuffer());
-      const dir = path.join(process.cwd(), "public", "sdks", slug);
-      await mkdir(dir, { recursive: true });
+      if (!res.ok) throw new Error(`Codegen(${lang}) ${res.status} ${(await res.text()).slice(0, 200)}`);
+      const { id } = (await res.json()) as { id: string };
+
+      const zip = await fetch(`${BASE}/code-generations/${id}/generated-sdk`, { headers: authHeaders });
+      if (!zip.ok) throw new Error(`Download(${lang}) ${zip.status}`);
+      const buf = Buffer.from(await zip.arrayBuffer());
       await writeFile(path.join(dir, `${slug}-${lang}-sdk.zip`), buf);
+      done.push(lang);
     }
-    return { status: "apimatic", languages, note: `SDKs generated by APIMatic Codegen: ${languages.join(", ")}.` };
+    return { status: "apimatic", languages: done, note: `SDKs generated by APIMatic Codegen: ${done.join(", ")}.` };
   } catch (err) {
-    return { status: "local", languages: [], note: `APIMatic Codegen unavailable (${(err as Error).message}).` };
+    return { status: done.length ? "apimatic" : "local", languages: done, note: `APIMatic Codegen: ${done.join(", ") || "none"} (${(err as Error).message}).` };
   }
 }
